@@ -1,0 +1,10 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+rule_files:
+# - "first.rules"
+# - "second.rules"
+
+# https://prometheus.io/docs/prometheus/latest/configuration/configuration/#dns_sd_config
+
