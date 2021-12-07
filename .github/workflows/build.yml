@@ -25,6 +25,7 @@ jobs:
         # grr... testcontainers.reuse.enable=true needs to be in home dir
         cp service-template-test-containers/src/main/resources/dot.testcontainers.properties ~/.testcontainers.properties
         ./gradlew compileAll
+        ./gradlew validateEnvironment
         .github/workflows/verify-todos.py
 
     - name: Save test results

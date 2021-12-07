@@ -55,6 +55,11 @@ checkTask.shouldRunAfter(":service-template-health-check:check")
 checkTask.shouldRunAfter(":service-template-distributed-tracing:check")
 
 
-tasks.register("validateEnvironment", DefaultTask::class) {
-    dependsOn("integrationTest")
+tasks.register("validateEnvironment", Test::class) {
+    filter {
+        includeTestsMatching("*ServiceTemplateApplicationTests")
+    }
+    val test = tasks.findByName("integrationTest")!! as Test
+    testClassesDirs = test.testClassesDirs
+    classpath += sourceSets["integrationTest"].runtimeClasspath
 }
