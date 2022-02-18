@@ -8,10 +8,7 @@ dependencies {
     implementation(project(":service-template-util"))
     implementation(project(":service-template-domain"))
 
-    implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
-
-    implementation("io.springfox:springfox-swagger2:$springFoxVersion")
-
+    implementation("org.springframework.boot:spring-boot-starter-web")
 
     testImplementation(project(":service-template-test-data"))
     testImplementation(project(":service-template-test-containers"))

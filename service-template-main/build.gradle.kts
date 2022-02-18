@@ -29,8 +29,7 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-devtools")
 
-    implementation("io.springfox:springfox-swagger-ui:$springFoxVersion")
-
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
 
     testImplementation(project(":service-template-test-util"))
     testImplementation(project(":service-template-test-data"))
@@ -41,9 +40,22 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
 
+
 }
 
 
+val integrationTest = tasks.findByName("integrationTest")!! as Test
+
+integrationTest.apply {
+    this.excludes.add("**/SwaggerUITests*")
+}
+
+tasks.register("testSwaggerUI", Test::class) {
+    this.includes.add("**/SwaggerUITests*")
+    testClassesDirs = integrationTest.testClassesDirs
+    classpath = integrationTest.classpath
+
+}
 
 val checkTask = tasks.findByName("check")!!
 

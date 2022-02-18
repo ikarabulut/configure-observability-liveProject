@@ -14,7 +14,7 @@ class UtilConfiguration {
     @Bean
     fun objectMapper(): ObjectMapper {
         val om = ObjectMapper()
-        om.registerModule(KotlinModule())
+        om.registerModule(KotlinModule.Builder().build())
         // TODO - configuration here
         return om
     }

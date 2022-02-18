@@ -3,7 +3,7 @@ package net.chrisrichardson.liveprojects.servicetemplate.healthcheck
 import io.restassured.RestAssured.get
 import net.chrisrichardson.liveprojects.servicetemplate.testcontainers.DefaultPropertyProvidingContainer
 import net.chrisrichardson.liveprojects.servicetemplate.testcontainers.MySqlContainer
-import net.chrisrichardson.liveprojects.servicetemplate.util.TestUtil.eventually
+import net.chrisrichardson.liveprojects.servicetemplate.util.Eventually.eventually
 import net.chrisrichardson.liveprojects.servicetemplate.util.UtilConfiguration
 import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration

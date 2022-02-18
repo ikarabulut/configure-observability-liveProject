@@ -4,9 +4,10 @@ import io.restassured.RestAssured.get
 import io.restassured.RestAssured.given
 import net.chrisrichardson.liveprojects.servicetemplate.domain.Account
 import net.chrisrichardson.liveprojects.servicetemplate.domain.AccountService
+import net.chrisrichardson.liveprojects.servicetemplate.domain.AccountServiceCommandResult
 import net.chrisrichardson.liveprojects.servicetemplate.testcontainers.DefaultPropertyProvidingContainer
 import net.chrisrichardson.liveprojects.servicetemplate.testcontainers.ZipkinContainer
-import net.chrisrichardson.liveprojects.servicetemplate.util.TestUtil.eventually
+import net.chrisrichardson.liveprojects.servicetemplate.util.Eventually.eventually
 import net.chrisrichardson.liveprojects.servicetemplate.util.UtilConfiguration
 import net.chrisrichardson.liveprojects.servicetemplate.web.AccountController
 import org.hamcrest.Matchers.greaterThan
@@ -23,7 +24,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebMvc
@@ -73,7 +73,7 @@ class DistributedTracingTest {
 
         val account = Account(105, "Owner", accountId)
 
-        Mockito.`when`(accountService.findAccount(accountId)).thenReturn(Optional.of(account))
+        Mockito.`when`(accountService.findAccount(accountId)).thenReturn(AccountServiceCommandResult.Success(account))
 
         given()
         .log().ifValidationFails()

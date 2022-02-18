@@ -7,6 +7,7 @@ import yaml
 
 
 if not os.path.exists("expected-todos.yml") :
+    print("TODOS: No expected-todos.yml")
     sys.exit(0)
 
 def execute_shell_command(command) :
@@ -45,15 +46,21 @@ if os.path.exists(yaml_file):
         recorded_failures = yaml.safe_load(stream)['failures']
         s1 = set(recorded_failures) - set(failures)
         s2 = set(failures) - set(recorded_failures)
+        c = set(failures).intersection(set(recorded_failures))
         if len(s1) > 0 or len(s2) > 0:
+            print(f"TODOS: still failing:")
+            for s in c:
+              print(s)
             if len(s1) > 0:
-                print(f"missing failures:")
+                print(f"TODOS: missing failures:")
                 for s in s1:
                     print(s)
             if len(s2) > 0:
-                print(f"new failures:")
+                print(f"TODOS: new failures:")
                 for s in s2:
                     print(s)
+            print(f"TODOS: new expectations:")
+            print (yaml.dump(failures))
             sys.exit(1)
         else:
-            print("TODOs successfully verified")
+            print("TODOS: successfully verified")

@@ -8,17 +8,17 @@ buildscript {
         maven { url = uri("https://plugins.gradle.org/m2/") }
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.20") // JVM
-        classpath("org.jetbrains.kotlin:kotlin-noarg:1.4.20")   // JPA
-        classpath("org.jetbrains.kotlin:kotlin-allopen:1.4.20") // Spring/All open
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10") // JVM
+        classpath("org.jetbrains.kotlin:kotlin-noarg:1.6.10")   // JPA
+        classpath("org.jetbrains.kotlin:kotlin-allopen:1.6.10") // Spring/All open
     }
 }
 
 plugins {
     id("org.springframework.boot") version springBootVersion apply false
     id("io.spring.dependency-management") version "1.0.10.RELEASE" apply false
-    kotlin("plugin.allopen") version "1.3.61"
-    kotlin("jvm") version "1.4.20"
+    kotlin("plugin.allopen") version "1.6.10"
+    kotlin("jvm") version "1.6.10"
 
     id("com.avast.gradle.docker-compose") version dockerComposePluginVersion
 
@@ -61,7 +61,7 @@ dockerCompose {
 gradle.projectsEvaluated {
     val assemble = tasks.findByPath(":service-template-main:assemble")
     for (task in tasks) {
-        if (task.name.endsWith("composeBuild", ignoreCase = true)) task.dependsOn(assemble)
+        if (task.name.endsWith("composeUp", ignoreCase = true)) task.dependsOn(assemble)
     }
 }
 
@@ -95,9 +95,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-
-
-        maven(url = "https://dl.bintray.com/eventuateio-oss/eventuate-maven-release")
         maven(url = "https://repo.spring.io/milestone")
     }
 
@@ -119,10 +116,24 @@ subprojects {
 
 
     dependencies {
+
+        implementation(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
+
+        // :
+
+        constraints {
+            implementation("com.google.guava:guava") {
+                version {
+                    strictly("25.0-jre")
+                }
+                because("Selenium conflict")
+            }
+        }
+
         implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.20")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.20")
 
-        testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 
 }

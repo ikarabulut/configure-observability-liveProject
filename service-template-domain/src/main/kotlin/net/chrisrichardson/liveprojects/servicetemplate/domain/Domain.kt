@@ -11,6 +11,15 @@ class Account (var balance : Long,
                @Id @GeneratedValue var id : Long? = null) {
     constructor() : this(0, "")
 
+    companion object {
+        fun createAccount(balance : Long, owner : String) : AccountCommandResult {
+            if (balance <= 0)
+                return AmountNotGreaterThanZero(balance)
+            else
+                return AccountCreationSuccessful(Account(balance, owner))
+
+        }
+    }
     fun debit(amount: Long) : AccountCommandResult {
         if (amount <= 0)
             return AmountNotGreaterThanZero(amount)
@@ -32,16 +41,10 @@ class Account (var balance : Long,
         return Success
     }
 
-    fun cancel(currentUserId: String): AccountCommandResult {
-        if (owner != currentUserId)
-            return Unauthorized
-        // Change status
-        return Success
-    }
-
 }
 
 sealed class AccountCommandResult {
+    data class AccountCreationSuccessful(val account: Account) : AccountCommandResult()
     object Success : AccountCommandResult()
     data class AmountNotGreaterThanZero(val amount : Long) : AccountCommandResult()
     data class BalanceExceeded(val amount : Long, val balance : Long) : AccountCommandResult()

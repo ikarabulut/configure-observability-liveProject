@@ -7,40 +7,43 @@ import java.util.*
 import java.util.function.Supplier
 
 interface AccountService {
-    fun createAccount(initialBalance: Long) : AccountServiceCommandResult
-    fun findAccount(id: Long): Optional<Account>
+    fun createAccount(initialBalance: Long): AccountServiceCommandResult
+    fun findAccount(id: Long): AccountServiceCommandResult
     fun debit(id: Long, amount: Long): AccountServiceCommandResult
     fun credit(id: Long, amount: Long): AccountServiceCommandResult
     fun findAllAccounts(): List<Account>
-    fun cancel(id: Long): AccountServiceCommandResult
 }
 
 @Service
 @Transactional
 class AccountServiceImpl @Autowired constructor(val accountRepository: AccountRepository,
                                                 val authenticatedUserSupplier: AuthenticatedUserSupplier = AuthenticatedUserSupplier.EMPTY_SUPPLIER,
-                                                val accountServiceObserver: AccountServiceObserver ?) : AccountService {
+                                                val accountServiceObserver: AccountServiceObserver?) : AccountService {
 
 
-    override fun createAccount(initialBalance: Long) : AccountServiceCommandResult {
-        if (initialBalance > 0) {
-            accountServiceObserver?.noteOrderCreated()
-            val owner = currentUserId()
-            val account = Account(initialBalance, owner)
-            return AccountServiceCommandResult.Success(accountRepository.save(account))
-        } else {
-            return AccountServiceCommandResult.AmountNotGreaterThanZero(initialBalance)
+    override fun createAccount(initialBalance: Long): AccountServiceCommandResult =
+        when (val outcome = Account.createAccount(initialBalance, currentUserId())) {
+            is AccountCommandResult.AccountCreationSuccessful -> {
+                accountServiceObserver?.noteAccountCreated()
+                AccountServiceCommandResult.Success(accountRepository.save(outcome.account))
+            }
+            is AccountCommandResult.AmountNotGreaterThanZero ->
+                AccountServiceCommandResult.AmountNotGreaterThanZero(initialBalance)
+            else ->
+                AccountServiceCommandResult.Unexpected(outcome)
         }
-    }
 
     private fun currentUserId(): String = authenticatedUserSupplier.get().id
 
-    override fun findAccount(id: Long): Optional<Account> {
-        return accountRepository.findById(id)
+    override fun findAccount(id: Long): AccountServiceCommandResult {
+        return withAuthorizedAccess(id) { account -> AccountServiceCommandResult.Success(account) }
+            .orElseGet { ->
+                AccountServiceCommandResult.AccountNotFound
+            }
     }
 
     override fun debit(id: Long, amount: Long): AccountServiceCommandResult {
-        return accountRepository.findById(id).map { account ->
+        return withAuthorizedAccess(id) { account ->
             when (val outcome = account.debit(amount)) {
                 is AccountCommandResult.Success -> {
                     accountServiceObserver?.noteSuccessfulDebit()
@@ -54,6 +57,10 @@ class AccountServiceImpl @Autowired constructor(val accountRepository: AccountRe
                     accountServiceObserver?.noteFailedDebit()
                     AccountServiceCommandResult.BalanceExceeded(amount, account.balance)
                 }
+                is AccountCommandResult.Unauthorized -> {
+                    accountServiceObserver?.noteFailedDebit()
+                    AccountServiceCommandResult.Unauthorized
+                }
                 else ->
                     AccountServiceCommandResult.Unexpected(outcome)
             }
@@ -65,7 +72,7 @@ class AccountServiceImpl @Autowired constructor(val accountRepository: AccountRe
 
 
     override fun credit(id: Long, amount: Long): AccountServiceCommandResult {
-        return accountRepository.findById(id).map { account ->
+        return withAuthorizedAccess(id) { account ->
             when (val outcome = account.credit(amount)) {
                 is AccountCommandResult.Success -> {
                     accountServiceObserver?.noteSuccessfulCredit()
@@ -74,6 +81,10 @@ class AccountServiceImpl @Autowired constructor(val accountRepository: AccountRe
                 is AccountCommandResult.AmountNotGreaterThanZero -> {
                     accountServiceObserver?.noteFailedCredit()
                     AccountServiceCommandResult.AmountNotGreaterThanZero(amount)
+                }
+                is AccountCommandResult.Unauthorized -> {
+                    accountServiceObserver?.noteFailedDebit()
+                    AccountServiceCommandResult.Unauthorized
                 }
                 else ->
                     AccountServiceCommandResult.Unexpected(outcome)
@@ -86,41 +97,29 @@ class AccountServiceImpl @Autowired constructor(val accountRepository: AccountRe
 
     override fun findAllAccounts(): List<Account> {
         val result: MutableList<Account> = mutableListOf()
-        accountRepository.findAll().toCollection(result)
+        accountRepository.findByOwner(currentUserId()).toCollection(result)
         return result
     }
 
-    override fun cancel(id: Long): AccountServiceCommandResult {
+    private fun withAuthorizedAccess(id: Long, function: (account: Account) -> AccountServiceCommandResult)
+            : Optional<AccountServiceCommandResult> {
         return accountRepository.findById(id).map { account ->
-            when (val outcome = account.cancel(currentUserId())) {
-                is AccountCommandResult.Success -> {
-                    accountServiceObserver?.noteSuccessfulCancel()
-                    AccountServiceCommandResult.Success(account)
-                }
-                AccountCommandResult.Unauthorized -> {
-                    accountServiceObserver?.noteUnauthorized()
-                    AccountServiceCommandResult.Unauthorized
-                }
-                else ->
-                    AccountServiceCommandResult.Unexpected(outcome)
-            }
-        }.orElseGet { ->
-            accountServiceObserver?.noteCancelFailed()
-            AccountServiceCommandResult.AccountNotFound
+            if (account.owner != currentUserId())
+                AccountServiceCommandResult.Unauthorized
+            else
+                function(account)
         }
     }
 }
 
 interface AccountServiceObserver {
 
-    fun noteOrderCreated()
+    fun noteAccountCreated()
     fun noteSuccessfulDebit()
     fun noteFailedDebit()
     fun noteFailedCredit()
     fun noteSuccessfulCredit()
-    fun noteUnauthorized()
-    fun noteCancelFailed()
-    fun noteSuccessfulCancel()
+    fun noteUnauthorizedAccountAccess()
 }
 
 sealed class AccountServiceCommandResult {

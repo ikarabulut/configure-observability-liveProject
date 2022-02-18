@@ -5,7 +5,7 @@ dependencies {
     implementation(project(":service-template-domain"))
     implementation(project(":service-template-config"))
 
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     runtimeOnly("mysql:mysql-connector-java:8.0.21")
 

@@ -2,13 +2,17 @@ package net.chrisrichardson.liveprojects.servicetemplate.util
 
 import java.util.concurrent.TimeUnit
 
-object TestUtil {
+object Eventually {
 
-    fun <T> eventually(function: () -> T): T {
-        return eventually(15, 1000, function)
+    fun <T> withConfiguration(iterations: Int = 15, sleepInMillis: Long = 1000): (() -> T) -> T {
+        return { function -> eventuallyInternal(iterations, sleepInMillis, function) }
     }
 
-    fun <T> eventually(iterations: Int = 15, sleepInMillis: Long = 1000, function: () -> T): T {
+    fun <T> eventually(function: () -> T): T {
+        return withConfiguration<T>(15, 1000)(function)
+    }
+
+    private fun <T> eventuallyInternal(iterations: Int, sleepInMillis: Long, function: () -> T): T {
         var laste: Throwable? = null
         for (n in 1..iterations) {
             try {
@@ -23,5 +27,6 @@ object TestUtil {
         }
         throw RuntimeException("Eventually timed out", laste!!)
     }
+
 
 }

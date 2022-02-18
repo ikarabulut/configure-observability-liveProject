@@ -1,6 +1,8 @@
 package net.chrisrichardson.liveprojects.servicetemplate.testcontainers
 
 import com.github.dockerjava.api.exception.InternalServerErrorException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
@@ -28,8 +30,10 @@ object ContainerNetwork {
 
 abstract class DefaultPropertyProvidingContainer : PropertyProvidingContainer {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun startAndAddProperties(registry: DynamicPropertyRegistry) {
-        System.out.println("Starting $this")
+        logger.info("Starting {}", this)
         start()
         addProperties(registry)
     }

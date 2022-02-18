@@ -28,12 +28,11 @@ class AccountController @Autowired constructor(val accountService: AccountServic
 
     @GetMapping("/accounts/{id}", produces = ["application/json"])
     fun getAccount(@PathVariable id: Long): ResponseEntity<*> {
-        return accountService.findAccount(id)
-                .map { account -> val ok : ResponseEntity<*>  = ResponseEntity.ok(AccountDTO(account.id!!, account.balance, account.owner))
-                    ok
-                }
-                .orElseGet { -> ResponseEntity(ErrorResponse("not found ${id}"), HttpStatus.NOT_FOUND) }
-
+        return when (val outcome = accountService.findAccount(id)) {
+            is Success -> ResponseEntity.ok(AccountDTO(outcome.account.id!!, outcome.account.balance, outcome.account.owner))
+            is AccountNotFound -> ResponseEntity(ErrorResponse("not found ${id}"), HttpStatus.NOT_FOUND)
+            else -> ResponseEntity(ErrorResponse("Unexpected outcome: ${outcome::class.simpleName}"), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 
     @GetMapping("/accounts", produces = ["application/json"])
@@ -48,6 +47,7 @@ class AccountController @Autowired constructor(val accountService: AccountServic
             is AmountNotGreaterThanZero -> ResponseEntity(ErrorResponse("amount must be greater than zero"), HttpStatus.CONFLICT)
             is BalanceExceeded -> ResponseEntity(ErrorResponse("amount must be greater than zero"), HttpStatus.CONFLICT)
             is AccountNotFound -> ResponseEntity(ErrorResponse("Not found"), HttpStatus.NOT_FOUND)
+            is Unauthorized -> ResponseEntity(ErrorResponse("Unauthorized"), HttpStatus.UNAUTHORIZED)
             else -> ResponseEntity(ErrorResponse("Unexpected outcome: ${outcome::class.simpleName}"), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
@@ -58,16 +58,7 @@ class AccountController @Autowired constructor(val accountService: AccountServic
             is Success -> ResponseEntity.ok(AccountDTO(outcome.account.id!!, outcome.account.balance, outcome.account.owner))
             is AmountNotGreaterThanZero -> ResponseEntity(ErrorResponse("amount must be greater than zero"), HttpStatus.CONFLICT)
             is AccountNotFound -> ResponseEntity(ErrorResponse("Not found"), HttpStatus.NOT_FOUND)
-            else -> ResponseEntity(ErrorResponse("Unexpected outcome: ${outcome::class.simpleName}"), HttpStatus.INTERNAL_SERVER_ERROR)
-        }
-    }
-
-    @PutMapping("/accounts/{id}/cancel", produces = ["application/json"])
-    fun cancelAccount(@PathVariable id: Long): ResponseEntity<*> {
-        return when (val outcome = accountService.cancel(id)) {
-            is Success -> ResponseEntity.ok(AccountDTO(outcome.account.id!!, outcome.account.balance, outcome.account.owner))
-            is AmountNotGreaterThanZero -> ResponseEntity(ErrorResponse("amount must be greater than zero"), HttpStatus.CONFLICT)
-            is AccountNotFound -> ResponseEntity(ErrorResponse("Not found"), HttpStatus.NOT_FOUND)
+            is Unauthorized -> ResponseEntity(ErrorResponse("Unauthorized"), HttpStatus.UNAUTHORIZED)
             else -> ResponseEntity(ErrorResponse("Unexpected outcome: ${outcome::class.simpleName}"), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
