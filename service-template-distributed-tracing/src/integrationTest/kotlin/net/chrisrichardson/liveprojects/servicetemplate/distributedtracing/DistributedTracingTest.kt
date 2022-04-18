@@ -62,7 +62,7 @@ class DistributedTracingTest {
 
         System.out.println("Zipkin url=$zipkinUrl")
 
-        eventually {
+        net.chrisrichardson.liveprojects.servicetemplate.util.Eventually.withConfiguration(iterations=100) {
 
             get(zipkinUrl)
                     .then()
@@ -82,8 +82,8 @@ class DistributedTracingTest {
         Mockito.verify(accountService).findAccount(accountId)
         Mockito.verifyNoMoreInteractions(accountService)
 
-        eventually {
-
+ 
+        net.chrisrichardson.liveprojects.servicetemplate.util.Eventually.withConfiguration(iterations=100) {
             val body = get(zipkinUrl)
                     .then()
                     .statusCode(200)

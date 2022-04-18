@@ -1,8 +1,0 @@
-failures:
-- net.chrisrichardson.liveprojects.servicetemplate.distributedtracing.DistributedTracingTest#shouldRecordTrace()
-- net.chrisrichardson.liveprojects.servicetemplate.healthcheck.HealthCheckEndpointTest#theServiceShouldBeHealthy()
-- net.chrisrichardson.liveprojects.servicetemplate.healthcheck.HealthCheckEndpointTest#theServiceShouldBecomeHealthyAgain()
-- net.chrisrichardson.liveprojects.servicetemplate.healthcheck.HealthCheckEndpointTest#theServiceShouldBecomeUnhealthy()
-- net.chrisrichardson.liveprojects.servicetemplate.metrics.CustomPrometheusMetricsEndpointTest#theServiceShouldExposePrometheus()
-- net.chrisrichardson.liveprojects.servicetemplate.metrics.PrometheusConfigurationTest#shouldConfigureServiceTarget()
-- net.chrisrichardson.liveprojects.servicetemplate.metrics.PrometheusMetricsEndpointTest#theServiceShouldExposePrometheus()

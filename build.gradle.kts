@@ -11,6 +11,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10") // JVM
         classpath("org.jetbrains.kotlin:kotlin-noarg:1.6.10")   // JPA
         classpath("org.jetbrains.kotlin:kotlin-allopen:1.6.10") // Spring/All open
+        classpath("com.avast.gradle:gradle-docker-compose-plugin:$dockerComposePluginVersion")
     }
 }
 
@@ -19,42 +20,41 @@ plugins {
     id("io.spring.dependency-management") version "1.0.10.RELEASE" apply false
     kotlin("plugin.allopen") version "1.6.10"
     kotlin("jvm") version "1.6.10"
-
-    id("com.avast.gradle.docker-compose") version dockerComposePluginVersion
-
 }
 
 val stopContainersDefault : String by project
 
-dockerCompose {
+apply(plugin = "docker-compose")
+
+configure<com.avast.gradle.dockercompose.ComposeExtension> {
     projectName = null
 
-    removeContainers = false
-    stopContainers = stopContainersDefault.toBoolean()
-    buildBeforePull = false
+    removeContainers.set(false)
+    stopContainers.set(stopContainersDefault.toBoolean())
+    buildBeforePull.set(false)
 
     createNested("sql").apply {
         projectName = null
-        startedServices = listOf("mysql")
+        startedServices.set(listOf("mysql"))
     }
 
     createNested("prometheus").apply {
         projectName = null
-        startedServices = listOf("mysql", "prometheus")
+        startedServices.set(listOf("mysql", "prometheus"))
     }
 
     createNested("zipkin").apply {
         projectName = null
-        startedServices = listOf("mysql", "prometheus", "zipkin")
+        startedServices.set(listOf("mysql", "prometheus", "zipkin"))
     }
 
     createNested("keycloak").apply {
         projectName = null
-        startedServices = listOf("keycloak")
+        startedServices.set(listOf("keycloak"))
     }
     createNested("sqlAndKeycloak").apply {
         projectName = null
-        startedServices = listOf("mysql", "keycloak")
+        startedServices.set(listOf("mysql", "keycloak"))
     }
 }
 

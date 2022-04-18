@@ -11,7 +11,7 @@ class DockerComposeHelper(vararg services : String) : BeforeAllCallback, AfterAl
 
     private val environment : DockerComposeContainer<Nothing> by lazy {
         DockerComposeContainer<Nothing>(File("../docker-compose.yml")).apply {
-            withLocalCompose(true)
+            withLocalCompose(false)
             withBuild(true)
             withServices(*services)
             if (services.contains("keycloak"))

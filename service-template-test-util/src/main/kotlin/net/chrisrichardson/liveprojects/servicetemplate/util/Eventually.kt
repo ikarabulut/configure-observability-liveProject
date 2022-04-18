@@ -4,12 +4,12 @@ import java.util.concurrent.TimeUnit
 
 object Eventually {
 
-    fun <T> withConfiguration(iterations: Int = 15, sleepInMillis: Long = 1000): (() -> T) -> T {
-        return { function -> eventuallyInternal(iterations, sleepInMillis, function) }
+    fun <T> withConfiguration(iterations: Int = 15, sleepInMillis: Long = 1000, function: () -> T):  T {
+        return eventuallyInternal(iterations, sleepInMillis, function)
     }
 
     fun <T> eventually(function: () -> T): T {
-        return withConfiguration<T>(15, 1000)(function)
+        return withConfiguration<T>(15, 1000, function)
     }
 
     private fun <T> eventuallyInternal(iterations: Int, sleepInMillis: Long, function: () -> T): T {
@@ -25,7 +25,8 @@ object Eventually {
             if (n != iterations)
                 TimeUnit.MILLISECONDS.sleep(sleepInMillis)
         }
-        throw RuntimeException("Eventually timed out", laste!!)
+        throw RuntimeException(String.format("Eventually timed out after %s iterations, sleeping for %s ms", iterations, sleepInMillis),
+                laste!!)
     }
 
 

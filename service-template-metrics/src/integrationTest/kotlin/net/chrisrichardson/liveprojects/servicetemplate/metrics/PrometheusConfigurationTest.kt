@@ -27,7 +27,7 @@ class PrometheusConfigurationTest {
         val dockerComposeContainer = DockerComposeContainer<Nothing>(File("../docker-compose.yml")).apply {
             withServices("prometheus")
             withExposedService("prometheus_1", prometheusContainer.containerPort, Wait.forHttp("/api/v1/targets"))
-            withBuild(false)
+            withBuild(true)
         }
     }
 
