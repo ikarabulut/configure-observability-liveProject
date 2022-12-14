@@ -5,7 +5,7 @@ import org.testcontainers.containers.wait.strategy.Wait
 
 object ZipkinContainer : DefaultPropertyProvidingContainer() {
 
-    override val container = GenericContainer<Nothing>("openzipkin/zipkin:2.21").apply {
+    override val container = GenericContainer<Nothing>("openzipkin/zipkin:2.23").apply {
         withReuse(true)
         withExposedPorts(9411)
 

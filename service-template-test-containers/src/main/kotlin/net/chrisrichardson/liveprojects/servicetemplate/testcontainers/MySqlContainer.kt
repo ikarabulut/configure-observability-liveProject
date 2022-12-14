@@ -1,12 +1,14 @@
 package net.chrisrichardson.liveprojects.servicetemplate.testcontainers
 
 import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.utility.DockerImageName
 
 object MySqlContainer : DefaultPropertyProvidingContainer() {
 
     fun getContainerAlias() = "mysql"
 
-    override val container: MySQLContainer<Nothing> = MySQLContainer<Nothing>("mysql:5.7.28").apply {
+    override val container: MySQLContainer<Nothing> = MySQLContainer<Nothing>(DockerImageName.parse("mysql/mysql-server:8.0.27-1.2.6-server").asCompatibleSubstituteFor("mysql")).apply {
+        withEnv("MYSQL_ROOT_HOST", "%")
         withDatabaseName("dbname")
         withReuse(true)
         ContainerNetwork.withNetwork(this)

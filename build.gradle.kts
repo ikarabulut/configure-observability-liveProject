@@ -27,33 +27,34 @@ val stopContainersDefault : String by project
 apply(plugin = "docker-compose")
 
 configure<com.avast.gradle.dockercompose.ComposeExtension> {
-    projectName = null
-
+    val pn : String? = null
+    setProjectName(pn)
     removeContainers.set(false)
     stopContainers.set(stopContainersDefault.toBoolean())
     buildBeforePull.set(false)
+    includeDependencies.set(true)
 
     createNested("sql").apply {
-        projectName = null
+        setProjectName(pn)
         startedServices.set(listOf("mysql"))
     }
 
     createNested("prometheus").apply {
-        projectName = null
+        setProjectName(pn)
         startedServices.set(listOf("mysql", "prometheus"))
     }
 
     createNested("zipkin").apply {
-        projectName = null
+        setProjectName(pn)
         startedServices.set(listOf("mysql", "prometheus", "zipkin"))
     }
 
     createNested("keycloak").apply {
-        projectName = null
+        setProjectName(pn)
         startedServices.set(listOf("keycloak"))
     }
     createNested("sqlAndKeycloak").apply {
-        projectName = null
+        setProjectName(pn)
         startedServices.set(listOf("mysql", "keycloak"))
     }
 }

@@ -15,7 +15,7 @@ class DockerComposeHelper(vararg services : String) : BeforeAllCallback, AfterAl
             withBuild(true)
             withServices(*services)
             if (services.contains("keycloak"))
-                withExposedService("keycloak_1", 8080, Wait.forHttp("/auth/")) // It's the JVM port
+                withExposedService("keycloak_1", 8091, Wait.forHttp("/")) // It's the JVM port
             withTailChildContainers(true)
         }
     }
