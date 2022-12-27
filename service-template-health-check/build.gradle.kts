@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":service-template-util"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation ("org.springframework.boot:spring-boot-starter-actuator")
 
     testImplementation(project(":service-template-persistence"))
     testImplementation(project(":service-template-test-data"))
