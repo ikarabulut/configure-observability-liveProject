@@ -11,6 +11,8 @@ dependencies {
 
 
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation ("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus:latest.release")
 
     testImplementation(project(":service-template-test-util"))
     testImplementation(project(":service-template-config"))
