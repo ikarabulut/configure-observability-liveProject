@@ -3,6 +3,10 @@ package net.chrisrichardson.liveprojects.servicetemplate.metrics
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import net.chrisrichardson.liveprojects.servicetemplate.domain.AccountServiceObserver
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 
 @Component
@@ -34,3 +38,14 @@ class AccountMetrics (var registry: MeterRegistry) : AccountServiceObserver {
     }
 
 }
+
+@Configuration(proxyBeanMethods = false)
+class MyMeterRegistryConfiguration {
+    @Bean
+    fun metricsCommonTags(environment: Environment): MeterRegistryCustomizer<MeterRegistry> {
+        return MeterRegistryCustomizer { registry ->
+            registry.config().commonTags("application.name", environment.getProperty("spring.application.name"))
+        }
+    }
+}
+
